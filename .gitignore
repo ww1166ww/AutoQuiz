@@ -1,0 +1,20 @@
+# Secrets — 絕對不要上傳到 GitHub
+.streamlit/secrets.toml
+
+# Python 快取
+__pycache__/
+*.py[cod]
+*.pyo
+
+# 本地題組快取與 log
+quiz_cache/
+quiz_logs.jsonl
+
+# 虛擬環境
+.venv/
+venv/
+env/
+
+# OS
+.DS_Store
+Thumbs.db
