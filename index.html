@@ -1,501 +1,1132 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-TW">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🎓 智慧商務題組遊戲</title>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>答題系統</title>
 
-  <!-- JSZip for PPTX parsing -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-  <!-- PDF.js for PDF parsing -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+		<!-- JSZip for PPTX parsing -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+		<!-- PDF.js for PDF parsing -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', '微軟正黑體', Arial, sans-serif; background: #f0f2f6; min-height: 100vh; color: #1f2937; }
+		<style>
+			*,
+			*::before,
+			*::after {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+			}
+			body {
+				font-family: "Segoe UI", "微軟正黑體", Arial, sans-serif;
+				background: #f0f2f6;
+				min-height: 100vh;
+				color: #1f2937;
+			}
 
-    /* ─── Pages ─── */
-    .page { display: none; }
-    .page.active { display: block; }
+			/* ─── Pages ─── */
+			.page {
+				display: none;
+			}
+			.page.active {
+				display: block;
+			}
 
-    /* ─── Buttons ─── */
-    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-           padding: 9px 18px; border: none; border-radius: 8px; font-size: 14px;
-           font-weight: 600; cursor: pointer; transition: all .18s; white-space: nowrap; }
-    .btn:disabled { opacity: .38; cursor: not-allowed; pointer-events: none; }
-    .btn-primary   { background: #4f46e5; color: #fff; }
-    .btn-primary:hover   { background: #4338ca; }
-    .btn-secondary { background: #f3f4f6; color: #374151; border: 1.5px solid #e5e7eb; }
-    .btn-secondary:hover { background: #e5e7eb; }
-    .btn-danger    { background: #ef4444; color: #fff; }
-    .btn-danger:hover    { background: #dc2626; }
-    .btn-success   { background: #10b981; color: #fff; }
-    .btn-success:hover   { background: #059669; }
-    .btn-block { width: 100%; }
-    .btn-lg { padding: 12px 24px; font-size: 16px; }
+			/* ─── Buttons ─── */
+			.btn {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				gap: 6px;
+				padding: 9px 18px;
+				border: none;
+				border-radius: 8px;
+				font-size: 14px;
+				font-weight: 600;
+				cursor: pointer;
+				transition: all 0.18s;
+				white-space: nowrap;
+			}
+			.btn:disabled {
+				opacity: 0.38;
+				cursor: not-allowed;
+				pointer-events: none;
+			}
+			.btn-primary {
+				background: #4f46e5;
+				color: #fff;
+			}
+			.btn-primary:hover {
+				background: #4338ca;
+			}
+			.btn-secondary {
+				background: #f3f4f6;
+				color: #374151;
+				border: 1.5px solid #e5e7eb;
+			}
+			.btn-secondary:hover {
+				background: #e5e7eb;
+			}
+			.btn-danger {
+				background: #ef4444;
+				color: #fff;
+			}
+			.btn-danger:hover {
+				background: #dc2626;
+			}
+			.btn-success {
+				background: #10b981;
+				color: #fff;
+			}
+			.btn-success:hover {
+				background: #059669;
+			}
+			.btn-block {
+				width: 100%;
+			}
+			.btn-lg {
+				padding: 12px 24px;
+				font-size: 16px;
+			}
 
-    /* ─── Forms ─── */
-    .form-group { margin-bottom: 16px; }
-    .form-group label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 5px; }
-    .form-group input { width: 100%; padding: 10px 13px; border: 1.5px solid #d1d5db; border-radius: 8px;
-                        font-size: 15px; outline: none; transition: border-color .18s; background: #fff; }
-    .form-group input:focus { border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79,70,229,.12); }
-    .form-hint { font-size: 11.5px; color: #9ca3af; margin-top: 4px; }
+			/* ─── Forms ─── */
+			.form-group {
+				margin-bottom: 16px;
+			}
+			.form-group label {
+				display: block;
+				font-size: 13px;
+				font-weight: 600;
+				color: #374151;
+				margin-bottom: 5px;
+			}
+			.form-group input {
+				width: 100%;
+				padding: 10px 13px;
+				border: 1.5px solid #d1d5db;
+				border-radius: 8px;
+				font-size: 15px;
+				outline: none;
+				transition: border-color 0.18s;
+				background: #fff;
+			}
+			.form-group input:focus {
+				border-color: #4f46e5;
+				box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+			}
+			.form-hint {
+				font-size: 11.5px;
+				color: #9ca3af;
+				margin-top: 4px;
+			}
 
-    /* ─── LOGIN ─── */
-    .login-wrap { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
-    .login-card { background: #fff; border-radius: 16px; padding: 44px 40px; width: 100%; max-width: 420px;
-                  box-shadow: 0 8px 32px rgba(0,0,0,.10); }
-    .login-icon { font-size: 48px; text-align: center; margin-bottom: 8px; }
-    .login-title { font-size: 24px; font-weight: 700; text-align: center; color: #1a1a2e; margin-bottom: 4px; }
-    .login-sub   { font-size: 14px; text-align: center; color: #6b7280; margin-bottom: 28px; }
-    .alert { padding: 10px 14px; border-radius: 8px; font-size: 14px; margin-top: 10px; }
-    .alert-error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
-    .alert-info  { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; font-size: 13px; }
+			/* ─── LOGIN ─── */
+			.login-wrap {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				min-height: 100vh;
+				padding: 20px;
+			}
+			.login-card {
+				background: #fff;
+				border-radius: 16px;
+				padding: 44px 40px;
+				width: 100%;
+				max-width: 420px;
+				box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+			}
+			.login-icon {
+				font-size: 48px;
+				text-align: center;
+				margin-bottom: 8px;
+			}
+			.login-title {
+				font-size: 24px;
+				font-weight: 700;
+				text-align: center;
+				color: #1a1a2e;
+				margin-bottom: 4px;
+			}
+			.login-sub {
+				font-size: 14px;
+				text-align: center;
+				color: #6b7280;
+				margin-bottom: 28px;
+			}
+			.alert {
+				padding: 10px 14px;
+				border-radius: 8px;
+				font-size: 14px;
+				margin-top: 10px;
+			}
+			.alert-error {
+				background: #fef2f2;
+				color: #991b1b;
+				border: 1px solid #fecaca;
+			}
+			.alert-info {
+				background: #eff6ff;
+				color: #1e40af;
+				border: 1px solid #bfdbfe;
+				font-size: 13px;
+			}
 
-    /* ─── TOP BAR ─── */
-    .topbar { background: #fff; padding: 10px 20px; display: flex; align-items: center; gap: 8px;
-              box-shadow: 0 1px 4px rgba(0,0,0,.07); position: sticky; top: 0; z-index: 200; }
-    .topbar-user { flex: 1; font-size: 14px; color: #6b7280; }
-    .topbar-user strong { color: #1f2937; }
+			/* ─── TOP BAR ─── */
+			.topbar {
+				background: #fff;
+				padding: 10px 20px;
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
+				position: sticky;
+				top: 0;
+				z-index: 200;
+			}
+			.topbar-user {
+				flex: 1;
+				font-size: 14px;
+				color: #6b7280;
+			}
+			.topbar-user strong {
+				color: #1f2937;
+			}
 
-    /* ─── CONTENT ─── */
-    .content { max-width: 820px; margin: 0 auto; padding: 24px 16px; }
+			/* ─── CONTENT ─── */
+			.content {
+				max-width: 820px;
+				margin: 0 auto;
+				padding: 24px 16px;
+			}
 
-    /* ─── UPLOAD CARD ─── */
-    .upload-card { background: #fff; border-radius: 14px; padding: 36px; text-align: center;
-                   box-shadow: 0 2px 10px rgba(0,0,0,.06); }
-    .upload-card h2 { margin-bottom: 22px; font-size: 20px; }
-    .file-drop { border: 2px dashed #c7d2fe; border-radius: 12px; padding: 44px 20px;
-                 cursor: pointer; transition: all .2s; margin-bottom: 20px; }
-    .file-drop:hover, .file-drop.dragover { border-color: #4f46e5; background: #eef2ff; }
-    .file-drop input[type=file] { display: none; }
-    .file-icon { font-size: 42px; margin-bottom: 10px; }
-    .file-drop p { color: #6b7280; font-size: 14px; }
-    .file-drop p strong { color: #4f46e5; }
-    .file-chosen { margin-top: 8px; color: #4f46e5; font-weight: 600; font-size: 14px; }
+			/* ─── UPLOAD CARD ─── */
+			.upload-card {
+				background: #fff;
+				border-radius: 14px;
+				padding: 36px;
+				text-align: center;
+				box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+			}
+			.upload-card h2 {
+				margin-bottom: 22px;
+				font-size: 20px;
+			}
+			.file-drop {
+				border: 2px dashed #c7d2fe;
+				border-radius: 12px;
+				padding: 44px 20px;
+				cursor: pointer;
+				transition: all 0.2s;
+				margin-bottom: 20px;
+			}
+			.file-drop:hover,
+			.file-drop.dragover {
+				border-color: #4f46e5;
+				background: #eef2ff;
+			}
+			.file-drop input[type="file"] {
+				display: none;
+			}
+			.file-icon {
+				font-size: 42px;
+				margin-bottom: 10px;
+			}
+			.file-drop p {
+				color: #6b7280;
+				font-size: 14px;
+			}
+			.file-drop p strong {
+				color: #4f46e5;
+			}
+			.file-chosen {
+				margin-top: 8px;
+				color: #4f46e5;
+				font-weight: 600;
+				font-size: 14px;
+			}
 
-    /* ─── SPINNER ─── */
-    .spinner-wrap { display: none; text-align: center; padding: 18px; color: #6b7280; font-size: 14px; }
-    .spinner-wrap.show { display: block; }
-    .spinner { width: 28px; height: 28px; border: 3px solid #e5e7eb; border-top-color: #4f46e5;
-               border-radius: 50%; animation: spin .75s linear infinite; display: inline-block; vertical-align: middle; margin-right: 8px; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+			/* ─── SPINNER ─── */
+			.spinner-wrap {
+				display: none;
+				text-align: center;
+				padding: 18px;
+				color: #6b7280;
+				font-size: 14px;
+			}
+			.spinner-wrap.show {
+				display: block;
+			}
+			.spinner {
+				width: 28px;
+				height: 28px;
+				border: 3px solid #e5e7eb;
+				border-top-color: #4f46e5;
+				border-radius: 50%;
+				animation: spin 0.75s linear infinite;
+				display: inline-block;
+				vertical-align: middle;
+				margin-right: 8px;
+			}
+			@keyframes spin {
+				to {
+					transform: rotate(360deg);
+				}
+			}
 
-    /* ─── PROGRESS ─── */
-    .progress-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
-    .progress-bar  { flex: 1; height: 8px; background: #e5e7eb; border-radius: 99px; overflow: hidden; }
-    .progress-fill { height: 100%; background: linear-gradient(90deg, #4f46e5, #818cf8); border-radius: 99px; transition: width .4s; }
-    .progress-txt  { font-size: 12px; color: #9ca3af; white-space: nowrap; }
+			/* ─── PROGRESS ─── */
+			.progress-row {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				margin-bottom: 14px;
+			}
+			.progress-bar {
+				flex: 1;
+				height: 8px;
+				background: #e5e7eb;
+				border-radius: 99px;
+				overflow: hidden;
+			}
+			.progress-fill {
+				height: 100%;
+				background: linear-gradient(90deg, #4f46e5, #818cf8);
+				border-radius: 99px;
+				transition: width 0.4s;
+			}
+			.progress-txt {
+				font-size: 12px;
+				color: #9ca3af;
+				white-space: nowrap;
+			}
 
-    /* ─── QUIZ CARD ─── */
-    .quiz-card { background: #fff; border-radius: 14px; padding: 28px; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
-    .group-header { margin-bottom: 18px; }
-    .group-title { font-size: 20px; font-weight: 700; color: #1a1a2e; margin-bottom: 6px; }
-    .group-meta   { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #9ca3af; }
-    .badge { display: inline-block; padding: 2px 10px; border-radius: 99px; font-size: 12px; font-weight: 600; }
-    .badge-基礎     { background: #d1fae5; color: #065f46; }
-    .badge-進階     { background: #fef3c7; color: #92400e; }
-    .badge-實務應用 { background: #fee2e2; color: #991b1b; }
-    .badge-default  { background: #f3f4f6; color: #374151; }
-    .question-text { font-size: 18px; font-weight: 600; line-height: 1.65; margin-bottom: 22px; color: #1f2937; }
+			/* ─── QUIZ CARD ─── */
+			.quiz-card {
+				background: #fff;
+				border-radius: 14px;
+				padding: 28px;
+				box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+			}
+			.group-header {
+				margin-bottom: 18px;
+			}
+			.group-title {
+				font-size: 20px;
+				font-weight: 700;
+				color: #1a1a2e;
+				margin-bottom: 6px;
+			}
+			.group-meta {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				font-size: 13px;
+				color: #9ca3af;
+			}
+			.badge {
+				display: inline-block;
+				padding: 2px 10px;
+				border-radius: 99px;
+				font-size: 12px;
+				font-weight: 600;
+			}
+			.badge-基礎 {
+				background: #d1fae5;
+				color: #065f46;
+			}
+			.badge-進階 {
+				background: #fef3c7;
+				color: #92400e;
+			}
+			.badge-實務應用 {
+				background: #fee2e2;
+				color: #991b1b;
+			}
+			.badge-default {
+				background: #f3f4f6;
+				color: #374151;
+			}
+			.question-text {
+				font-size: 18px;
+				font-weight: 600;
+				line-height: 1.65;
+				margin-bottom: 22px;
+				color: #1f2937;
+			}
 
-    /* ─── OPTIONS ─── */
-    .options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-    .option { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border: 2px solid #e5e7eb;
-              border-radius: 10px; cursor: pointer; transition: all .15s; font-size: 15px; line-height: 1.5; }
-    .option:hover:not(.disabled) { border-color: #818cf8; background: #f5f3ff; }
-    .option.selected { border-color: #4f46e5; background: #eef2ff; }
-    .option.opt-correct { border-color: #10b981; background: #d1fae5; }
-    .option.opt-wrong   { border-color: #ef4444; background: #fee2e2; }
-    .option.disabled    { cursor: default; }
-    .opt-idx { width: 30px; height: 30px; min-width: 30px; border-radius: 50%; background: #f3f4f6;
-               display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; }
-    .option.selected  .opt-idx { background: #4f46e5; color: #fff; }
-    .option.opt-correct .opt-idx { background: #10b981; color: #fff; }
-    .option.opt-wrong   .opt-idx { background: #ef4444; color: #fff; }
+			/* ─── OPTIONS ─── */
+			.options {
+				display: flex;
+				flex-direction: column;
+				gap: 10px;
+				margin-bottom: 20px;
+			}
+			.option {
+				display: flex;
+				align-items: flex-start;
+				gap: 12px;
+				padding: 14px 16px;
+				border: 2px solid #e5e7eb;
+				border-radius: 10px;
+				cursor: pointer;
+				transition: all 0.15s;
+				font-size: 15px;
+				line-height: 1.5;
+			}
+			.option:hover:not(.disabled) {
+				border-color: #818cf8;
+				background: #f5f3ff;
+			}
+			.option.selected {
+				border-color: #4f46e5;
+				background: #eef2ff;
+			}
+			.option.opt-correct {
+				border-color: #10b981;
+				background: #d1fae5;
+			}
+			.option.opt-wrong {
+				border-color: #ef4444;
+				background: #fee2e2;
+			}
+			.option.disabled {
+				cursor: default;
+			}
+			.opt-idx {
+				width: 30px;
+				height: 30px;
+				min-width: 30px;
+				border-radius: 50%;
+				background: #f3f4f6;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-weight: 700;
+				font-size: 13px;
+			}
+			.option.selected .opt-idx {
+				background: #4f46e5;
+				color: #fff;
+			}
+			.option.opt-correct .opt-idx {
+				background: #10b981;
+				color: #fff;
+			}
+			.option.opt-wrong .opt-idx {
+				background: #ef4444;
+				color: #fff;
+			}
 
-    /* ─── FEEDBACK ─── */
-    .feedback { padding: 13px 16px; border-radius: 10px; font-size: 15px; font-weight: 600;
-                margin-bottom: 14px; display: none; }
-    .feedback.show-success { background: #d1fae5; color: #065f46; display: block; }
-    .feedback.show-error   { background: #fee2e2; color: #991b1b; display: block; }
+			/* ─── FEEDBACK ─── */
+			.feedback {
+				padding: 13px 16px;
+				border-radius: 10px;
+				font-size: 15px;
+				font-weight: 600;
+				margin-bottom: 14px;
+				display: none;
+			}
+			.feedback.show-success {
+				background: #d1fae5;
+				color: #065f46;
+				display: block;
+			}
+			.feedback.show-error {
+				background: #fee2e2;
+				color: #991b1b;
+				display: block;
+			}
 
-    /* ─── EXPLANATION ─── */
-    .explanation-box { background: #f8fafc; border-left: 4px solid #4f46e5; padding: 14px 16px;
-                       border-radius: 0 8px 8px 0; margin-bottom: 14px; display: none; }
-    .explanation-box.show { display: block; }
-    .expl-label { font-size: 12px; font-weight: 700; color: #4f46e5; text-transform: uppercase;
-                  letter-spacing: .05em; margin-bottom: 6px; }
-    .expl-text  { font-size: 14px; color: #374151; line-height: 1.75; }
+			/* ─── EXPLANATION ─── */
+			.explanation-box {
+				background: #f8fafc;
+				border-left: 4px solid #4f46e5;
+				padding: 14px 16px;
+				border-radius: 0 8px 8px 0;
+				margin-bottom: 14px;
+				display: none;
+			}
+			.explanation-box.show {
+				display: block;
+			}
+			.expl-label {
+				font-size: 12px;
+				font-weight: 700;
+				color: #4f46e5;
+				text-transform: uppercase;
+				letter-spacing: 0.05em;
+				margin-bottom: 6px;
+			}
+			.expl-text {
+				font-size: 14px;
+				color: #374151;
+				line-height: 1.75;
+			}
 
-    /* ─── SUMMARY ─── */
-    .summary-box { background: #fffbeb; border: 1.5px solid #fcd34d; border-radius: 10px;
-                   padding: 14px 16px; margin-bottom: 16px; display: none;
-                   font-size: 13.5px; color: #78350f; line-height: 1.85; white-space: pre-line; }
-    .summary-box.show { display: block; }
-    .summary-title { font-weight: 700; font-size: 14px; color: #92400e; margin-bottom: 6px; }
+			/* ─── SUMMARY ─── */
+			.summary-box {
+				background: #fffbeb;
+				border: 1.5px solid #fcd34d;
+				border-radius: 10px;
+				padding: 14px 16px;
+				margin-bottom: 16px;
+				display: none;
+				font-size: 13.5px;
+				color: #78350f;
+				line-height: 1.85;
+				white-space: pre-line;
+			}
+			.summary-box.show {
+				display: block;
+			}
+			.summary-title {
+				font-weight: 700;
+				font-size: 14px;
+				color: #92400e;
+				margin-bottom: 6px;
+			}
 
-    /* ─── BUTTON ROW ─── */
-    .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
-    .btn-row .btn { flex: 1; min-width: 90px; }
+			/* ─── BUTTON ROW ─── */
+			.btn-row {
+				display: flex;
+				gap: 8px;
+				flex-wrap: wrap;
+				margin-top: 4px;
+			}
+			.btn-row .btn {
+				flex: 1;
+				min-width: 90px;
+			}
 
-    /* ─── FINISHED ─── */
-    .finished-card { background: #fff; border-radius: 14px; padding: 52px 28px; text-align: center;
-                     box-shadow: 0 2px 10px rgba(0,0,0,.06); display: none; }
-    .finished-card .big-icon { font-size: 56px; margin-bottom: 14px; }
-    .finished-card h2 { font-size: 22px; margin-bottom: 10px; }
-    .finished-card p  { color: #6b7280; margin-bottom: 28px; }
+			/* ─── FINISHED ─── */
+			.finished-card {
+				background: #fff;
+				border-radius: 14px;
+				padding: 52px 28px;
+				text-align: center;
+				box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+				display: none;
+			}
+			.finished-card .big-icon {
+				font-size: 56px;
+				margin-bottom: 14px;
+			}
+			.finished-card h2 {
+				font-size: 22px;
+				margin-bottom: 10px;
+			}
+			.finished-card p {
+				color: #6b7280;
+				margin-bottom: 28px;
+			}
 
-    /* ─── TEACHER ─── */
-    .teacher-toolbar { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
-    .teacher-toolbar input { flex: 1; min-width: 180px; padding: 9px 13px; border: 1.5px solid #d1d5db;
-                             border-radius: 8px; font-size: 14px; outline: none; }
-    .teacher-toolbar input:focus { border-color: #4f46e5; }
-    .log-table-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid #e5e7eb;
-                      margin-bottom: 12px; background: #fff; }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    thead th { background: #f9fafb; padding: 10px 11px; text-align: left; font-weight: 600;
-               color: #374151; white-space: nowrap; border-bottom: 1px solid #e5e7eb; }
-    tbody td { padding: 9px 11px; border-top: 1px solid #f3f4f6; color: #4b5563; }
-    tbody tr:hover td { background: #fafafa; }
-    .badge-ok  { background: #d1fae5; color: #065f46; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; }
-    .badge-no  { background: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; }
-    .badge-nil { color: #d1d5db; font-size: 11px; }
-    .table-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
-    .count-txt { font-size: 13px; color: #9ca3af; }
+			/* ─── TEACHER ─── */
+			.teacher-toolbar {
+				display: flex;
+				gap: 8px;
+				margin-bottom: 14px;
+				flex-wrap: wrap;
+			}
+			.teacher-toolbar input {
+				flex: 1;
+				min-width: 180px;
+				padding: 9px 13px;
+				border: 1.5px solid #d1d5db;
+				border-radius: 8px;
+				font-size: 14px;
+				outline: none;
+			}
+			.teacher-toolbar input:focus {
+				border-color: #4f46e5;
+			}
+			.log-table-wrap {
+				overflow-x: auto;
+				border-radius: 10px;
+				border: 1px solid #e5e7eb;
+				margin-bottom: 12px;
+				background: #fff;
+			}
+			table {
+				width: 100%;
+				border-collapse: collapse;
+				font-size: 13px;
+			}
+			thead th {
+				background: #f9fafb;
+				padding: 10px 11px;
+				text-align: left;
+				font-weight: 600;
+				color: #374151;
+				white-space: nowrap;
+				border-bottom: 1px solid #e5e7eb;
+			}
+			tbody td {
+				padding: 9px 11px;
+				border-top: 1px solid #f3f4f6;
+				color: #4b5563;
+			}
+			tbody tr:hover td {
+				background: #fafafa;
+			}
+			.badge-ok {
+				background: #d1fae5;
+				color: #065f46;
+				padding: 2px 8px;
+				border-radius: 99px;
+				font-size: 11px;
+				font-weight: 600;
+			}
+			.badge-no {
+				background: #fee2e2;
+				color: #991b1b;
+				padding: 2px 8px;
+				border-radius: 99px;
+				font-size: 11px;
+				font-weight: 600;
+			}
+			.badge-nil {
+				color: #d1d5db;
+				font-size: 11px;
+			}
+			.table-footer {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				flex-wrap: wrap;
+				gap: 8px;
+			}
+			.count-txt {
+				font-size: 13px;
+				color: #9ca3af;
+			}
 
-    /* ─── Responsive ─── */
-    @media (max-width: 600px) {
-      .login-card   { padding: 28px 20px; }
-      .quiz-card    { padding: 18px 14px; }
-      .question-text { font-size: 16px; }
-      .option       { font-size: 14px; padding: 11px 12px; }
-      .btn-row .btn { font-size: 13px; padding: 9px 10px; }
-    }
-  </style>
-</head>
-<body>
-
-<!-- ══════════════════════════════════════════
-     LOGIN PAGE
+			/* ─── Responsive ─── */
+			@media (max-width: 600px) {
+				.login-card {
+					padding: 28px 20px;
+				}
+				.quiz-card {
+					padding: 18px 14px;
+				}
+				.question-text {
+					font-size: 16px;
+				}
+				.option {
+					font-size: 14px;
+					padding: 11px 12px;
+				}
+				.btn-row .btn {
+					font-size: 13px;
+					padding: 9px 10px;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<!-- ══════════════════════════════════════════
+    LOGIN PAGE
 ══════════════════════════════════════════ -->
-<div id="page-login" class="page active">
-  <div class="login-wrap">
-    <div class="login-card">
-      <div class="login-icon">🎓</div>
-      <div class="login-title">智慧商務題組遊戲</div>
-      <div class="login-sub">請登入以開始測驗</div>
+		<div id="page-login" class="page active">
+			<div class="login-wrap">
+				<div class="login-card">
+					<div class="login-icon">🎓</div>
+					<div class="login-title">智慧商務題組遊戲</div>
+					<div class="login-sub">請登入以開始測驗</div>
 
-      <div class="form-group">
-        <label>學號</label>
-        <input type="text" id="inp-account" placeholder="請輸入學號" maxlength="20" autocomplete="off">
-      </div>
-      <div class="form-group">
-        <label>姓名</label>
-        <input type="text" id="inp-name" placeholder="請輸入姓名" maxlength="30" autocomplete="off">
-      </div>
-      <div class="form-group">
-        <label>OpenAI API Key</label>
-        <input type="password" id="inp-apikey" placeholder="sk-..." maxlength="200" autocomplete="off">
-        <div class="form-hint">🔒 金鑰僅暫存於本機工作階段記憶體（sessionStorage），不會寫入任何檔案或傳送至第三方。</div>
-      </div>
+					<div class="form-group">
+						<label>學號</label>
+						<input
+							type="text"
+							id="inp-account"
+							placeholder="請輸入學號"
+							maxlength="20"
+							autocomplete="off"
+						/>
+					</div>
+					<div class="form-group">
+						<label>姓名</label>
+						<input
+							type="text"
+							id="inp-name"
+							placeholder="請輸入姓名"
+							maxlength="30"
+							autocomplete="off"
+						/>
+					</div>
+					<div class="form-group">
+						<label>OpenAI API Key</label>
+						<input
+							type="password"
+							id="inp-apikey"
+							placeholder="sk-..."
+							maxlength="200"
+							autocomplete="off"
+						/>
+						<div class="form-hint">
+							🔒
+							金鑰僅暫存於本機工作階段記憶體（sessionStorage），不會寫入任何檔案或傳送至第三方。
+						</div>
+					</div>
 
-      <button class="btn btn-primary btn-block btn-lg" style="margin-top:8px;" onclick="doLogin()">登入開始測驗</button>
-      <div id="login-err" class="alert alert-error" style="display:none;"></div>
-    </div>
-  </div>
-</div>
+					<button
+						class="btn btn-primary btn-block btn-lg"
+						style="margin-top: 8px"
+						onclick="doLogin()"
+					>
+						登入開始測驗
+					</button>
+					<div
+						id="login-err"
+						class="alert alert-error"
+						style="display: none"
+					></div>
+				</div>
+			</div>
+		</div>
 
-
-<!-- ══════════════════════════════════════════
-     QUIZ PAGE
+		<!-- ══════════════════════════════════════════
+    QUIZ PAGE
 ══════════════════════════════════════════ -->
-<div id="page-quiz" class="page">
-  <div class="topbar">
-    <div class="topbar-user">歡迎，<strong id="topbar-name"></strong></div>
-    <button class="btn btn-secondary" onclick="goTeacher()">📋 答題記錄</button>
-    <button class="btn btn-secondary" onclick="doLogout()">登出</button>
-  </div>
+		<div id="page-quiz" class="page">
+			<div class="topbar">
+				<div class="topbar-user">
+					歡迎，<strong id="topbar-name"></strong>
+				</div>
+				<button class="btn btn-secondary" onclick="goTeacher()">
+					📋 答題記錄
+				</button>
+				<button class="btn btn-secondary" onclick="doLogout()">
+					登出
+				</button>
+			</div>
 
-  <div class="content">
+			<div class="content">
+				<!-- Upload section -->
+				<div id="upload-section">
+					<div class="upload-card">
+						<h2>📂 上傳簡報以生成題組</h2>
+						<div
+							class="file-drop"
+							id="file-drop"
+							onclick="
+								document.getElementById('file-input').click()
+							"
+							ondragover="
+								event.preventDefault();
+								this.classList.add('dragover');
+							"
+							ondragleave="this.classList.remove('dragover')"
+							ondrop="handleDrop(event)"
+						>
+							<input
+								type="file"
+								id="file-input"
+								accept=".pptx,.pdf"
+								onchange="handleFileSelect(event)"
+							/>
+							<div class="file-icon">📄</div>
+							<p>點擊或拖曳 <strong>PPTX / PDF</strong> 到這裡</p>
+							<div class="file-chosen" id="file-chosen"></div>
+						</div>
+						<div class="spinner-wrap" id="upload-spinner">
+							<span class="spinner"></span
+							><span id="upload-spinner-msg"
+								>處理中，請稍候…</span
+							>
+						</div>
+						<button
+							class="btn btn-primary btn-block btn-lg"
+							id="btn-generate"
+							onclick="doGenerate()"
+							disabled
+						>
+							🚀 生成題組（呼叫 AI）
+						</button>
+						<div
+							id="upload-err"
+							class="alert alert-error"
+							style="display: none; margin-top: 12px"
+						></div>
+					</div>
+				</div>
 
-    <!-- Upload section -->
-    <div id="upload-section">
-      <div class="upload-card">
-        <h2>📂 上傳簡報以生成題組</h2>
-        <div class="file-drop" id="file-drop"
-             onclick="document.getElementById('file-input').click()"
-             ondragover="event.preventDefault();this.classList.add('dragover')"
-             ondragleave="this.classList.remove('dragover')"
-             ondrop="handleDrop(event)">
-          <input type="file" id="file-input" accept=".pptx,.pdf" onchange="handleFileSelect(event)">
-          <div class="file-icon">📄</div>
-          <p>點擊或拖曳 <strong>PPTX / PDF</strong> 到這裡</p>
-          <div class="file-chosen" id="file-chosen"></div>
-        </div>
-        <div class="spinner-wrap" id="upload-spinner">
-          <span class="spinner"></span><span id="upload-spinner-msg">處理中，請稍候…</span>
-        </div>
-        <button class="btn btn-primary btn-block btn-lg" id="btn-generate" onclick="doGenerate()" disabled>
-          🚀 生成題組（呼叫 AI）
-        </button>
-        <div id="upload-err" class="alert alert-error" style="display:none;margin-top:12px;"></div>
-      </div>
-    </div>
+				<!-- Quiz section -->
+				<div id="quiz-section" style="display: none">
+					<!-- Progress -->
+					<div class="progress-row">
+						<div class="progress-bar">
+							<div
+								class="progress-fill"
+								id="progress-fill"
+								style="width: 0%"
+							></div>
+						</div>
+						<div class="progress-txt" id="progress-txt"></div>
+					</div>
 
-    <!-- Quiz section -->
-    <div id="quiz-section" style="display:none;">
+					<!-- Quiz card -->
+					<div class="quiz-card" id="quiz-card">
+						<div class="group-header">
+							<div class="group-title" id="qz-group-title"></div>
+							<div class="group-meta">
+								難度：<span
+									class="badge"
+									id="qz-diff-badge"
+								></span>
+								&nbsp;｜&nbsp; 本組第
+								<span id="qz-q-num"></span> / 3 題
+							</div>
+						</div>
 
-      <!-- Progress -->
-      <div class="progress-row">
-        <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
-        <div class="progress-txt" id="progress-txt"></div>
-      </div>
+						<!-- Summary (pass/fail/regen message) -->
+						<div class="summary-box" id="summary-box">
+							<div class="summary-title" id="summary-title"></div>
+							<div id="summary-text"></div>
+						</div>
 
-      <!-- Quiz card -->
-      <div class="quiz-card" id="quiz-card">
-        <div class="group-header">
-          <div class="group-title" id="qz-group-title"></div>
-          <div class="group-meta">
-            難度：<span class="badge" id="qz-diff-badge"></span>
-            &nbsp;｜&nbsp; 本組第 <span id="qz-q-num"></span> / 3 題
-          </div>
-        </div>
+						<!-- Regen spinner -->
+						<div class="spinner-wrap" id="regen-spinner">
+							<span class="spinner"></span>重新生成題組中，請稍候…
+						</div>
 
-        <!-- Summary (pass/fail/regen message) -->
-        <div class="summary-box" id="summary-box">
-          <div class="summary-title" id="summary-title"></div>
-          <div id="summary-text"></div>
-        </div>
+						<!-- Question -->
+						<div class="question-text" id="qz-question"></div>
 
-        <!-- Regen spinner -->
-        <div class="spinner-wrap" id="regen-spinner">
-          <span class="spinner"></span>重新生成題組中，請稍候…
-        </div>
+						<!-- Options -->
+						<div class="options" id="qz-options"></div>
 
-        <!-- Question -->
-        <div class="question-text" id="qz-question"></div>
+						<!-- Feedback -->
+						<div class="feedback" id="qz-feedback"></div>
 
-        <!-- Options -->
-        <div class="options" id="qz-options"></div>
+						<!-- Explanation -->
+						<div class="explanation-box" id="expl-box">
+							<div class="expl-label">📖 解析</div>
+							<div class="expl-text" id="expl-text"></div>
+						</div>
 
-        <!-- Feedback -->
-        <div class="feedback" id="qz-feedback"></div>
+						<!-- Action buttons -->
+						<div class="btn-row">
+							<button
+								class="btn btn-primary"
+								id="btn-submit"
+								onclick="doSubmit()"
+							>
+								✅ 提交答案
+							</button>
+							<button
+								class="btn btn-secondary"
+								id="btn-explain"
+								onclick="doExplain()"
+								disabled
+							>
+								📖 查看解析
+							</button>
+							<button
+								class="btn btn-secondary"
+								id="btn-next"
+								onclick="doNext()"
+								disabled
+							>
+								⏭ 下一題
+							</button>
+						</div>
+					</div>
 
-        <!-- Explanation -->
-        <div class="explanation-box" id="expl-box">
-          <div class="expl-label">📖 解析</div>
-          <div class="expl-text" id="expl-text"></div>
-        </div>
+					<!-- Finished card -->
+					<div class="finished-card" id="finished-card">
+						<div class="big-icon">🎉</div>
+						<h2>所有題組已完成！</h2>
+						<p>恭喜你完成全部 10 個題組的測驗！</p>
+						<button
+							class="btn btn-primary btn-lg"
+							onclick="doRestart()"
+							style="min-width: 160px"
+						>
+							重新開始
+						</button>
+					</div>
+				</div>
+				<!-- /quiz-section -->
+			</div>
+			<!-- /content -->
+		</div>
+		<!-- /page-quiz -->
 
-        <!-- Action buttons -->
-        <div class="btn-row">
-          <button class="btn btn-primary"   id="btn-submit"  onclick="doSubmit()">✅ 提交答案</button>
-          <button class="btn btn-secondary" id="btn-explain" onclick="doExplain()" disabled>📖 查看解析</button>
-          <button class="btn btn-secondary" id="btn-next"    onclick="doNext()"    disabled>⏭ 下一題</button>
-        </div>
-      </div>
-
-      <!-- Finished card -->
-      <div class="finished-card" id="finished-card">
-        <div class="big-icon">🎉</div>
-        <h2>所有題組已完成！</h2>
-        <p>恭喜你完成全部 10 個題組的測驗！</p>
-        <button class="btn btn-primary btn-lg" onclick="doRestart()" style="min-width:160px;">重新開始</button>
-      </div>
-
-    </div><!-- /quiz-section -->
-  </div><!-- /content -->
-</div><!-- /page-quiz -->
-
-
-<!-- ══════════════════════════════════════════
+		<!-- ══════════════════════════════════════════
      TEACHER PAGE
 ══════════════════════════════════════════ -->
-<div id="page-teacher" class="page">
-  <div class="topbar">
-    <button class="btn btn-secondary" onclick="goQuiz()">← 返回測驗</button>
-    <div class="topbar-user" style="text-align:right;"><strong>📋 答題記錄管理</strong></div>
-  </div>
+		<div id="page-teacher" class="page">
+			<div class="topbar">
+				<button class="btn btn-secondary" onclick="goQuiz()">
+					← 返回測驗
+				</button>
+				<div class="topbar-user" style="text-align: right">
+					<strong>📋 答題記錄管理</strong>
+				</div>
+			</div>
 
-  <div class="content">
-    <div class="alert alert-info" style="margin-bottom:14px;">
-      💡 記錄儲存於本機瀏覽器（localStorage）。清除瀏覽器資料後將一併消失。
-    </div>
+			<div class="content">
+				<div class="alert alert-info" style="margin-bottom: 14px">
+					💡
+					記錄儲存於本機瀏覽器（localStorage）。清除瀏覽器資料後將一併消失。
+				</div>
 
-    <div class="teacher-toolbar">
-      <input type="text" id="search-inp" placeholder="搜尋學號 / 姓名 / 題組…" oninput="filterLogs()">
-      <button class="btn btn-secondary" onclick="clearSearch()">清除</button>
-      <button class="btn btn-success"   onclick="exportCSV()">⬇ 匯出 CSV</button>
-    </div>
+				<div class="teacher-toolbar">
+					<input
+						type="text"
+						id="search-inp"
+						placeholder="搜尋學號 / 姓名 / 題組…"
+						oninput="filterLogs()"
+					/>
+					<button class="btn btn-secondary" onclick="clearSearch()">
+						清除
+					</button>
+					<button class="btn btn-success" onclick="exportCSV()">
+						⬇ 匯出 CSV
+					</button>
+				</div>
 
-    <div class="log-table-wrap">
-      <table id="log-table">
-        <thead>
-          <tr>
-            <th style="width:36px;"><input type="checkbox" id="check-all" onchange="toggleAll(this)"></th>
-            <th>時間</th><th>學號</th><th>姓名</th><th>題組</th>
-            <th>題目</th><th>作答</th><th>正確</th><th>看解析</th>
-          </tr>
-        </thead>
-        <tbody id="log-tbody"></tbody>
-      </table>
-    </div>
+				<div class="log-table-wrap">
+					<table id="log-table">
+						<thead>
+							<tr>
+								<th style="width: 36px">
+									<input
+										type="checkbox"
+										id="check-all"
+										onchange="toggleAll(this)"
+									/>
+								</th>
+								<th>時間</th>
+								<th>學號</th>
+								<th>姓名</th>
+								<th>題組</th>
+								<th>題目</th>
+								<th>選項</th>
+								<th>正確</th>
+								<th>看解析</th>
+							</tr>
+						</thead>
+						<tbody id="log-tbody"></tbody>
+					</table>
+				</div>
 
-    <div class="table-footer">
-      <span class="count-txt" id="log-count"></span>
-      <button class="btn btn-danger" onclick="deleteSelected()">🗑 刪除選中</button>
-    </div>
-  </div>
-</div>
+				<div class="table-footer">
+					<span class="count-txt" id="log-count"></span>
+					<button class="btn btn-danger" onclick="deleteSelected()">
+						🗑 刪除選中
+					</button>
+				</div>
+			</div>
+		</div>
 
-
-<!-- ══════════════════════════════════════════
+		<!-- ══════════════════════════════════════════
      JAVASCRIPT
 ══════════════════════════════════════════ -->
-<script>
-// ────────────────────────────────────────────
-// PDF.js worker
-// ────────────────────────────────────────────
-if (typeof pdfjsLib !== 'undefined') {
-  pdfjsLib.GlobalWorkerOptions.workerSrc =
-    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-}
+		<script>
+			// ────────────────────────────────────────────
+			// PDF.js worker
+			// ────────────────────────────────────────────
+			if (typeof pdfjsLib !== "undefined") {
+				pdfjsLib.GlobalWorkerOptions.workerSrc =
+					"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+			}
 
-// ────────────────────────────────────────────
-// State
-// ────────────────────────────────────────────
-const S = {
-  page: 'login',
-  account: '', name: '',
-  sourceText: '',
-  questions: null,       // { groups: [...] }
-  groupI: 0, qI: 0,
-  correct: 0, wrongStreak: 0,
-  // phase: answering | submitted | regen_pending | regen_ready | finished
-  phase: 'answering',
-  pendingAction: '',     // 'next_q' | 'next_group' | 'retry_group'
-  regenning: false,
-  lastSel: null,
-};
+			// ────────────────────────────────────────────
+			// State
+			// ────────────────────────────────────────────
+			const S = {
+				page: "login",
+				account: "",
+				name: "",
+				sourceText: "",
+				questions: null, // { groups: [...] }
+				groupI: 0,
+				qI: 0,
+				correct: 0,
+				wrongStreak: 0,
+				// phase: answering | submitted | regen_pending | regen_ready | finished
+				phase: "answering",
+				pendingAction: "", // 'next_q' | 'next_group' | 'retry_group'
+				regenning: false,
+				lastSel: null,
+			};
 
-let selectedFile = null;
-let allLogs = [];        // loaded from localStorage on teacher open
-let filteredLogs = [];
+			let selectedFile = null;
+			let allLogs = []; // loaded from localStorage on teacher open
+			let filteredLogs = [];
 
-// ── API key helpers (sessionStorage only) ──
-function getApiKey()  { return sessionStorage.getItem('qz_api_key') || ''; }
-function setApiKey(k) { if (k) sessionStorage.setItem('qz_api_key', k); }
+			// ── API key helpers (sessionStorage only) ──
+			function getApiKey() {
+				return sessionStorage.getItem("qz_api_key") || "";
+			}
+			function setApiKey(k) {
+				if (k) sessionStorage.setItem("qz_api_key", k);
+			}
 
-// ── Log helpers (localStorage) ──
-function readLogs()       { try { return JSON.parse(localStorage.getItem('qz_logs') || '[]'); } catch { return []; } }
-function writeLogs(logs)  { localStorage.setItem('qz_logs', JSON.stringify(logs)); }
-function appendLog(r)     { const lg = readLogs(); lg.push(r); writeLogs(lg); }
+			// ── Log helpers (localStorage) ──
+			function readLogs() {
+				try {
+					return JSON.parse(localStorage.getItem("qz_logs") || "[]");
+				} catch {
+					return [];
+				}
+			}
+			function writeLogs(logs) {
+				localStorage.setItem("qz_logs", JSON.stringify(logs));
+			}
+			function appendLog(r) {
+				const lg = readLogs();
+				lg.push(r);
+				writeLogs(lg);
+			}
 
-// ────────────────────────────────────────────
-// Navigation
-// ────────────────────────────────────────────
-function showPage(name) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page-' + name).classList.add('active');
-  S.page = name;
-}
-function goQuiz()    { showPage('quiz'); }
-function goTeacher() { renderTeacher(); showPage('teacher'); }
+			// ────────────────────────────────────────────
+			// Navigation
+			// ────────────────────────────────────────────
+			function showPage(name) {
+				document
+					.querySelectorAll(".page")
+					.forEach((p) => p.classList.remove("active"));
+				document.getElementById("page-" + name).classList.add("active");
+				S.page = name;
+			}
+			function goQuiz() {
+				showPage("quiz");
+			}
+			function goTeacher() {
+				renderTeacher();
+				showPage("teacher");
+			}
 
-// ────────────────────────────────────────────
-// LOGIN
-// ────────────────────────────────────────────
-function doLogin() {
-  const acc  = document.getElementById('inp-account').value.trim();
-  const name = document.getElementById('inp-name').value.trim();
-  const key  = document.getElementById('inp-apikey').value.trim();
-  const err  = document.getElementById('login-err');
-  err.style.display = 'none';
-  if (!acc || !name) { showErr(err, '請輸入學號與姓名'); return; }
-  if (!key)          { showErr(err, '請輸入 OpenAI API Key'); return; }
-  S.account = acc; S.name = name;
-  setApiKey(key);
-  document.getElementById('inp-apikey').value = ''; // clear from DOM immediately
-  document.getElementById('topbar-name').textContent = name + '（' + acc + '）';
-  showPage('quiz');
-  renderQuiz();
-}
+			// ────────────────────────────────────────────
+			// LOGIN
+			// ────────────────────────────────────────────
+			function doLogin() {
+				const acc = document.getElementById("inp-account").value.trim();
+				const name = document.getElementById("inp-name").value.trim();
+				const key = document.getElementById("inp-apikey").value.trim();
+				const err = document.getElementById("login-err");
+				err.style.display = "none";
+				if (!acc || !name) {
+					showErr(err, "請輸入學號與姓名");
+					return;
+				}
+				if (!key) {
+					showErr(err, "請輸入 OpenAI API Key");
+					return;
+				}
+				S.account = acc;
+				S.name = name;
+				setApiKey(key);
+				document.getElementById("inp-apikey").value = ""; // clear from DOM immediately
+				document.getElementById("topbar-name").textContent =
+					name + "（" + acc + "）";
+				showPage("quiz");
+				renderQuiz();
+			}
 
-function doLogout() {
-  if (!confirm('確定登出？目前答題進度將清除。')) return;
-  sessionStorage.removeItem('qz_api_key');
-  Object.assign(S, { page:'login', account:'', name:'', sourceText:'', questions:null,
-                     groupI:0, qI:0, correct:0, wrongStreak:0, phase:'answering',
-                     pendingAction:'', regenning:false, lastSel:null });
-  selectedFile = null;
-  document.getElementById('inp-account').value = '';
-  document.getElementById('inp-name').value    = '';
-  document.getElementById('inp-apikey').value  = '';
-  showPage('login');
-}
+			function doLogout() {
+				if (!confirm("確定登出？目前答題進度將清除。")) return;
+				sessionStorage.removeItem("qz_api_key");
+				Object.assign(S, {
+					page: "login",
+					account: "",
+					name: "",
+					sourceText: "",
+					questions: null,
+					groupI: 0,
+					qI: 0,
+					correct: 0,
+					wrongStreak: 0,
+					phase: "answering",
+					pendingAction: "",
+					regenning: false,
+					lastSel: null,
+				});
+				selectedFile = null;
+				document.getElementById("inp-account").value = "";
+				document.getElementById("inp-name").value = "";
+				document.getElementById("inp-apikey").value = "";
+				showPage("login");
+			}
 
-// ────────────────────────────────────────────
-// File handling
-// ────────────────────────────────────────────
-function handleFileSelect(e) {
-  const f = e.target.files[0];
-  if (f) pickFile(f);
-}
-function handleDrop(e) {
-  e.preventDefault();
-  document.getElementById('file-drop').classList.remove('dragover');
-  const f = e.dataTransfer.files[0];
-  if (f && /\.(pptx|pdf)$/i.test(f.name)) pickFile(f);
-}
-function pickFile(f) {
-  selectedFile = f;
-  document.getElementById('file-chosen').textContent = '已選擇：' + f.name;
-  document.getElementById('btn-generate').disabled = false;
-  document.getElementById('upload-err').style.display = 'none';
-}
+			// ────────────────────────────────────────────
+			// File handling
+			// ────────────────────────────────────────────
+			function handleFileSelect(e) {
+				const f = e.target.files[0];
+				if (f) pickFile(f);
+			}
+			function handleDrop(e) {
+				e.preventDefault();
+				document
+					.getElementById("file-drop")
+					.classList.remove("dragover");
+				const f = e.dataTransfer.files[0];
+				if (f && /\.(pptx|pdf)$/i.test(f.name)) pickFile(f);
+			}
+			function pickFile(f) {
+				selectedFile = f;
+				document.getElementById("file-chosen").textContent =
+					"已選擇：" + f.name;
+				document.getElementById("btn-generate").disabled = false;
+				document.getElementById("upload-err").style.display = "none";
+			}
 
-// ────────────────────────────────────────────
-// Text extraction — PPTX
-// ────────────────────────────────────────────
-async function extractPPTX(file) {
-  if (typeof JSZip === 'undefined') throw new Error('JSZip 未載入，請確認網路後重新整理。');
-  const zip = await JSZip.loadAsync(file);
-  const keys = Object.keys(zip.files)
-    .filter(n => /^ppt\/slides\/slide\d+\.xml$/.test(n))
-    .sort((a, b) => parseInt(a.match(/\d+/)[0]) - parseInt(b.match(/\d+/)[0]));
-  const parts = [];
-  for (const k of keys) {
-    const xml = await zip.files[k].async('string');
-    const hits = xml.match(/<a:t[^>]*>([\s\S]*?)<\/a:t>/g) || [];
-    const texts = hits.map(m => m.replace(/<[^>]+>/g, '').trim()).filter(Boolean);
-    if (texts.length) parts.push(texts.join(' '));
-  }
-  return parts.join('\n');
-}
+			// ────────────────────────────────────────────
+			// Text extraction — PPTX
+			// ────────────────────────────────────────────
+			async function extractPPTX(file) {
+				if (typeof JSZip === "undefined")
+					throw new Error("JSZip 未載入，請確認網路後重新整理。");
+				const zip = await JSZip.loadAsync(file);
+				const keys = Object.keys(zip.files)
+					.filter((n) => /^ppt\/slides\/slide\d+\.xml$/.test(n))
+					.sort(
+						(a, b) =>
+							parseInt(a.match(/\d+/)[0]) -
+							parseInt(b.match(/\d+/)[0]),
+					);
+				const parts = [];
+				for (const k of keys) {
+					const xml = await zip.files[k].async("string");
+					const hits =
+						xml.match(/<a:t[^>]*>([\s\S]*?)<\/a:t>/g) || [];
+					const texts = hits
+						.map((m) => m.replace(/<[^>]+>/g, "").trim())
+						.filter(Boolean);
+					if (texts.length) parts.push(texts.join(" "));
+				}
+				return parts.join("\n");
+			}
 
-// ────────────────────────────────────────────
-// Text extraction — PDF
-// ────────────────────────────────────────────
-async function extractPDF(file) {
-  if (typeof pdfjsLib === 'undefined') throw new Error('PDF.js 未載入，請確認網路後重新整理。');
-  const buf = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
-  const parts = [];
-  for (let i = 1; i <= pdf.numPages; i++) {
-    const page    = await pdf.getPage(i);
-    const content = await page.getTextContent();
-    const text    = content.items.map(it => it.str).join(' ').trim();
-    if (text) parts.push(text);
-  }
-  return parts.join('\n');
-}
+			// ────────────────────────────────────────────
+			// Text extraction — PDF
+			// ────────────────────────────────────────────
+			async function extractPDF(file) {
+				if (typeof pdfjsLib === "undefined")
+					throw new Error("PDF.js 未載入，請確認網路後重新整理。");
+				const buf = await file.arrayBuffer();
+				const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+				const parts = [];
+				for (let i = 1; i <= pdf.numPages; i++) {
+					const page = await pdf.getPage(i);
+					const content = await page.getTextContent();
+					const text = content.items
+						.map((it) => it.str)
+						.join(" ")
+						.trim();
+					if (text) parts.push(text);
+				}
+				return parts.join("\n");
+			}
 
-// ────────────────────────────────────────────
-// OpenAI
-// ────────────────────────────────────────────
-const PROMPT_10 = `請根據下方簡報內容生成 10 個題組，嚴格依據簡報文字內容出題，不得自由發揮。
+			// ────────────────────────────────────────────
+			// OpenAI
+			// ────────────────────────────────────────────
+			const PROMPT_10 = `請根據下方簡報內容生成 10 個題組，嚴格依據簡報文字內容出題，不得自由發揮。
 每個題組需包含：
 - 題組名稱 (group_title)
 - 題組難度 ("基礎"、"進階"、"實務應用")
@@ -521,7 +1152,7 @@ const PROMPT_10 = `請根據下方簡報內容生成 10 個題組，嚴格依據
 {content}
 ###CONTENT_END`;
 
-const PROMPT_REGEN = `請根據下方簡報內容，針對題組「{group_title}」重新生成全新三題（四選一、唯一正確、含解析），
+			const PROMPT_REGEN = `請根據下方簡報內容，針對題組「{group_title}」重新生成全新三題（四選一、唯一正確、含解析），
 維持該組概念與難度。嚴禁與先前三題重複；嚴格依簡報內容，不得自由發揮。只輸出 JSON：
 {
   "group_title": "{group_title}",
@@ -537,493 +1168,766 @@ const PROMPT_REGEN = `請根據下方簡報內容，針對題組「{group_title}
 {content}
 ###CONTENT_END`;
 
-function fillTemplate(tpl, vars) {
-  return Object.entries(vars).reduce((s, [k, v]) => s.split('{' + k + '}').join(v), tpl);
-}
+			function fillTemplate(tpl, vars) {
+				return Object.entries(vars).reduce(
+					(s, [k, v]) => s.split("{" + k + "}").join(v),
+					tpl,
+				);
+			}
 
-async function callOpenAI(prompt) {
-  const key = getApiKey();
-  if (!key) throw new Error('API Key 遺失，請重新登入。');
-  const res = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
-    body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: '請務必以 json 物件格式回覆，用戶需要純 JSON。' },
-        { role: 'user',   content: '請以 JSON 物件回覆以下需求（不要任何多餘文字）：\n' + prompt },
-      ],
-      temperature: 0.2,
-      max_tokens: 14000,
-      response_format: { type: 'json_object' },
-    }),
-  });
-  if (!res.ok) {
-    const d = await res.json().catch(() => ({}));
-    throw new Error((d.error && d.error.message) || 'HTTP ' + res.status);
-  }
-  const d = await res.json();
-  return robustJsonParse(d.choices[0].message.content);
-}
+			async function callOpenAI(prompt) {
+				const key = getApiKey();
+				if (!key) throw new Error("API Key 遺失，請重新登入。");
+				const res = await fetch(
+					"https://api.openai.com/v1/chat/completions",
+					{
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+							Authorization: "Bearer " + key,
+						},
+						body: JSON.stringify({
+							model: "gpt-4o-mini",
+							messages: [
+								{
+									role: "system",
+									content:
+										"請務必以 json 物件格式回覆，用戶需要純 JSON。",
+								},
+								{
+									role: "user",
+									content:
+										"請以 JSON 物件回覆以下需求（不要任何多餘文字）：\n" +
+										prompt,
+								},
+							],
+							temperature: 0.2,
+							max_tokens: 14000,
+							response_format: { type: "json_object" },
+						}),
+					},
+				);
+				if (!res.ok) {
+					const d = await res.json().catch(() => ({}));
+					throw new Error(
+						(d.error && d.error.message) || "HTTP " + res.status,
+					);
+				}
+				const d = await res.json();
+				return robustJsonParse(d.choices[0].message.content);
+			}
 
-function robustJsonParse(text) {
-  try { return JSON.parse(text); } catch {}
-  const cleaned = text.replace(/^```(?:json)?\s*|\s*```$/gim, '').trim();
-  const m1 = cleaned.indexOf('{'), m2 = cleaned.lastIndexOf('}');
-  if (m1 !== -1 && m2 > m1) try { return JSON.parse(cleaned.slice(m1, m2 + 1)); } catch {}
-  try {
-    const arr = JSON.parse(cleaned);
-    if (Array.isArray(arr) && arr.length && typeof arr[0] === 'object') return arr[0];
-  } catch {}
-  throw new Error('JSON 解析失敗');
-}
+			function robustJsonParse(text) {
+				try {
+					return JSON.parse(text);
+				} catch {}
+				const cleaned = text
+					.replace(/^```(?:json)?\s*|\s*```$/gim, "")
+					.trim();
+				const m1 = cleaned.indexOf("{"),
+					m2 = cleaned.lastIndexOf("}");
+				if (m1 !== -1 && m2 > m1)
+					try {
+						return JSON.parse(cleaned.slice(m1, m2 + 1));
+					} catch {}
+				try {
+					const arr = JSON.parse(cleaned);
+					if (
+						Array.isArray(arr) &&
+						arr.length &&
+						typeof arr[0] === "object"
+					)
+						return arr[0];
+				} catch {}
+				throw new Error("JSON 解析失敗");
+			}
 
-// ────────────────────────────────────────────
-// Generate (upload → AI)
-// ────────────────────────────────────────────
-async function doGenerate() {
-  if (!selectedFile) return;
-  const errEl    = document.getElementById('upload-err');
-  const spinner  = document.getElementById('upload-spinner');
-  const spinMsg  = document.getElementById('upload-spinner-msg');
-  const btnGen   = document.getElementById('btn-generate');
-  errEl.style.display = 'none';
-  btnGen.disabled = true;
-  try {
-    spinner.classList.add('show');
-    spinMsg.textContent = '讀取簡報中…';
-    let content;
-    if (/\.pptx$/i.test(selectedFile.name)) {
-      content = await extractPPTX(selectedFile);
-    } else {
-      content = await extractPDF(selectedFile);
-    }
-    if (content.trim().length < 50) throw new Error('讀到的內容太少（<50字），請確認檔案內容。');
-    S.sourceText = content;
+			// ────────────────────────────────────────────
+			// Generate (upload → AI)
+			// ────────────────────────────────────────────
+			async function doGenerate() {
+				if (!selectedFile) return;
+				const errEl = document.getElementById("upload-err");
+				const spinner = document.getElementById("upload-spinner");
+				const spinMsg = document.getElementById("upload-spinner-msg");
+				const btnGen = document.getElementById("btn-generate");
+				errEl.style.display = "none";
+				btnGen.disabled = true;
+				try {
+					spinner.classList.add("show");
+					spinMsg.textContent = "讀取簡報中…";
+					let content;
+					if (/\.pptx$/i.test(selectedFile.name)) {
+						content = await extractPPTX(selectedFile);
+					} else {
+						content = await extractPDF(selectedFile);
+					}
+					if (content.trim().length < 50)
+						throw new Error(
+							"讀到的內容太少（<50字），請確認檔案內容。",
+						);
+					S.sourceText = content;
 
-    spinMsg.textContent = '呼叫 AI 生成 10 題組（約 30–60 秒）…';
-    const data = await callOpenAI(fillTemplate(PROMPT_10, { content }));
-    if (!data.groups || !Array.isArray(data.groups) || !data.groups.length)
-      throw new Error('AI 回傳格式錯誤（缺少 groups）');
+					spinMsg.textContent =
+						"呼叫 AI 生成 10 題組（約 30–60 秒）…";
+					const data = await callOpenAI(
+						fillTemplate(PROMPT_10, { content }),
+					);
+					if (
+						!data.groups ||
+						!Array.isArray(data.groups) ||
+						!data.groups.length
+					)
+						throw new Error("AI 回傳格式錯誤（缺少 groups）");
 
-    S.questions     = data;
-    S.groupI        = S.qI = S.correct = S.wrongStreak = 0;
-    S.phase         = 'answering';
-    S.pendingAction = '';
-    S.regenning     = false;
-    S.lastSel       = null;
+					S.questions = data;
+					S.groupI = S.qI = S.correct = S.wrongStreak = 0;
+					S.phase = "answering";
+					S.pendingAction = "";
+					S.regenning = false;
+					S.lastSel = null;
 
-    document.getElementById('upload-section').style.display = 'none';
-    document.getElementById('quiz-section').style.display   = 'block';
-    renderQuizState();
-  } catch (e) {
-    showErr(errEl, '生成失敗：' + e.message);
-    btnGen.disabled = false;
-  } finally {
-    spinner.classList.remove('show');
-  }
-}
+					document.getElementById("upload-section").style.display =
+						"none";
+					document.getElementById("quiz-section").style.display =
+						"block";
+					renderQuizState();
+				} catch (e) {
+					showErr(errEl, "生成失敗：" + e.message);
+					btnGen.disabled = false;
+				} finally {
+					spinner.classList.remove("show");
+				}
+			}
 
-// ────────────────────────────────────────────
-// Quiz rendering helpers
-// ────────────────────────────────────────────
-function renderQuiz() {
-  if (!S.questions) {
-    document.getElementById('upload-section').style.display = 'block';
-    document.getElementById('quiz-section').style.display   = 'none';
-  } else {
-    document.getElementById('upload-section').style.display = 'none';
-    document.getElementById('quiz-section').style.display   = 'block';
-    renderQuizState();
-  }
-}
+			// ────────────────────────────────────────────
+			// Quiz rendering helpers
+			// ────────────────────────────────────────────
+			function renderQuiz() {
+				if (!S.questions) {
+					document.getElementById("upload-section").style.display =
+						"block";
+					document.getElementById("quiz-section").style.display =
+						"none";
+				} else {
+					document.getElementById("upload-section").style.display =
+						"none";
+					document.getElementById("quiz-section").style.display =
+						"block";
+					renderQuizState();
+				}
+			}
 
-function renderQuizState() {
-  if (S.phase === 'finished') { showFinished(); return; }
-  const groups = S.questions.groups;
-  if (S.groupI >= groups.length) { showFinished(); return; }
+			function renderQuizState() {
+				if (S.phase === "finished") {
+					showFinished();
+					return;
+				}
+				const groups = S.questions.groups;
+				if (S.groupI >= groups.length) {
+					showFinished();
+					return;
+				}
 
-  const g   = groups[S.groupI];
-  const q   = g.questions[S.qI];
-  const totalQs   = groups.length * 3;
-  const currentQ  = S.groupI * 3 + S.qI;          // 0-based answered count
-  const pct = (currentQ / totalQs) * 100;
+				const g = groups[S.groupI];
+				const q = g.questions[S.qI];
+				const totalQs = groups.length * 3;
+				const currentQ = S.groupI * 3 + S.qI; // 0-based answered count
+				const pct = (currentQ / totalQs) * 100;
 
-  // Progress
-  document.getElementById('progress-fill').style.width = pct + '%';
-  document.getElementById('progress-txt').textContent  =
-    '第 ' + (currentQ + 1) + ' / ' + totalQs + ' 題｜題組 ' + (S.groupI + 1) + ' / ' + groups.length;
+				// Progress
+				document.getElementById("progress-fill").style.width =
+					pct + "%";
+				document.getElementById("progress-txt").textContent =
+					"第 " +
+					(currentQ + 1) +
+					" / " +
+					totalQs +
+					" 題｜題組 " +
+					(S.groupI + 1) +
+					" / " +
+					groups.length;
 
-  // Show quiz card, hide finished
-  document.getElementById('quiz-card').style.display     = '';
-  document.getElementById('finished-card').style.display = 'none';
+				// Show quiz card, hide finished
+				document.getElementById("quiz-card").style.display = "";
+				document.getElementById("finished-card").style.display = "none";
 
-  // Group info
-  document.getElementById('qz-group-title').textContent = '題組 ' + (S.groupI + 1) + '：' + g.group_title;
-  document.getElementById('qz-q-num').textContent       = S.qI + 1;
-  const badge = document.getElementById('qz-diff-badge');
-  badge.textContent = g.difficulty || 'N/A';
-  badge.className   = 'badge badge-' + (g.difficulty || 'default');
+				// Group info
+				document.getElementById("qz-group-title").textContent =
+					"題組 " + (S.groupI + 1) + "：" + g.group_title;
+				document.getElementById("qz-q-num").textContent = S.qI + 1;
+				const badge = document.getElementById("qz-diff-badge");
+				badge.textContent = g.difficulty || "N/A";
+				badge.className = "badge badge-" + (g.difficulty || "default");
 
-  // Summary box
-  const sumBox  = document.getElementById('summary-box');
-  const sumTxt  = document.getElementById('summary-text');
-  const sumTitl = document.getElementById('summary-title');
-  if (S._summaryMsg) {
-    sumTitl.textContent = S._summaryTitle || '📝 題組重點摘要';
-    sumTxt.textContent  = S._summaryMsg;
-    sumBox.classList.add('show');
-  } else {
-    sumBox.classList.remove('show');
-  }
+				// Summary box
+				const sumBox = document.getElementById("summary-box");
+				const sumTxt = document.getElementById("summary-text");
+				const sumTitl = document.getElementById("summary-title");
+				if (S._summaryMsg) {
+					sumTitl.textContent = S._summaryTitle || "📝 題組重點摘要";
+					sumTxt.textContent = S._summaryMsg;
+					sumBox.classList.add("show");
+				} else {
+					sumBox.classList.remove("show");
+				}
 
-  // Regen spinner
-  document.getElementById('regen-spinner').style.display = S.regenning ? 'block' : 'none';
+				// Regen spinner
+				document.getElementById("regen-spinner").style.display =
+					S.regenning ? "block" : "none";
 
-  // Question
-  document.getElementById('qz-question').textContent = q.question;
+				// Question
+				document.getElementById("qz-question").textContent = q.question;
 
-  // Options
-  const optWrap   = document.getElementById('qz-options');
-  const isAnswering = (S.phase === 'answering');
-  optWrap.innerHTML = '';
-  const LABELS = ['A','B','C','D'];
-  q.options.forEach((opt, i) => {
-    const div = document.createElement('div');
-    let cls = 'option' + (isAnswering ? '' : ' disabled');
-    if (!isAnswering && i === S.lastSel)         cls += (i === q.answer_index ? ' opt-correct' : ' opt-wrong');
-    if (!isAnswering && i === q.answer_index && i !== S.lastSel) cls += ' opt-correct';
-    if (isAnswering  && i === S.lastSel)         cls += ' selected';
-    div.className = cls;
-    div.innerHTML = '<div class="opt-idx">' + LABELS[i] + '</div><div>' + escHtml(opt) + '</div>';
-    if (isAnswering) div.addEventListener('click', () => selectOption(i));
-    optWrap.appendChild(div);
-  });
+				// Options
+				const optWrap = document.getElementById("qz-options");
+				const isAnswering = S.phase === "answering";
+				optWrap.innerHTML = "";
+				const LABELS = ["A", "B", "C", "D"];
+				q.options.forEach((opt, i) => {
+					const div = document.createElement("div");
+					let cls = "option" + (isAnswering ? "" : " disabled");
+					if (!isAnswering && i === S.lastSel)
+						cls +=
+							i === q.answer_index
+								? " opt-correct"
+								: " opt-wrong";
+					if (!isAnswering && i === q.answer_index && i !== S.lastSel)
+						cls += " opt-correct";
+					if (isAnswering && i === S.lastSel) cls += " selected";
+					div.className = cls;
+					div.innerHTML =
+						'<div class="opt-idx">' +
+						LABELS[i] +
+						"</div><div>" +
+						escHtml(opt) +
+						"</div>";
+					if (isAnswering)
+						div.addEventListener("click", () => selectOption(i));
+					optWrap.appendChild(div);
+				});
 
-  // Feedback
-  const fb = document.getElementById('qz-feedback');
-  if (S._feedback) {
-    fb.textContent = S._feedback;
-    fb.className   = 'feedback ' + (S._feedbackOk ? 'show-success' : 'show-error');
-  } else {
-    fb.className = 'feedback';
-  }
+				// Feedback
+				const fb = document.getElementById("qz-feedback");
+				if (S._feedback) {
+					fb.textContent = S._feedback;
+					fb.className =
+						"feedback " +
+						(S._feedbackOk ? "show-success" : "show-error");
+				} else {
+					fb.className = "feedback";
+				}
 
-  // Explanation box
-  const explBox = document.getElementById('expl-box');
-  if (S._showExpl) {
-    document.getElementById('expl-text').textContent = q.explanation || '本題無解析';
-    explBox.classList.add('show');
-  } else {
-    explBox.classList.remove('show');
-  }
+				// Explanation box
+				const explBox = document.getElementById("expl-box");
+				if (S._showExpl) {
+					document.getElementById("expl-text").textContent =
+						q.explanation || "本題無解析";
+					explBox.classList.add("show");
+				} else {
+					explBox.classList.remove("show");
+				}
 
-  // Buttons
-  const btnSubmit  = document.getElementById('btn-submit');
-  const btnExplain = document.getElementById('btn-explain');
-  const btnNext    = document.getElementById('btn-next');
+				// Buttons
+				const btnSubmit = document.getElementById("btn-submit");
+				const btnExplain = document.getElementById("btn-explain");
+				const btnNext = document.getElementById("btn-next");
 
-  btnSubmit.disabled  = !isAnswering;
-  btnExplain.disabled = isAnswering;
+				btnSubmit.disabled = !isAnswering;
+				btnExplain.disabled = isAnswering;
 
-  if      (S.phase === 'regen_ready' && S.pendingAction === 'retry_group') { btnNext.textContent = '🔄 重試題組';   btnNext.disabled = false; }
-  else if (S.pendingAction === 'next_group')                                { btnNext.textContent = '▶ 下一題組';    btnNext.disabled = false; }
-  else if (S.pendingAction === 'next_q')                                    { btnNext.textContent = '⏭ 下一題';     btnNext.disabled = false; }
-  else if (S.phase === 'regen_pending' && !S.regenning)                     { btnNext.textContent = '🔄 重試題組';   btnNext.disabled = false; }
-  else                                                                       { btnNext.textContent = '⏭ 下一題';     btnNext.disabled = true;  }
-}
+				if (
+					S.phase === "regen_ready" &&
+					S.pendingAction === "retry_group"
+				) {
+					btnNext.textContent = "🔄 重試題組";
+					btnNext.disabled = false;
+				} else if (S.pendingAction === "next_group") {
+					btnNext.textContent = "▶ 下一題組";
+					btnNext.disabled = false;
+				} else if (S.pendingAction === "next_q") {
+					btnNext.textContent = "⏭ 下一題";
+					btnNext.disabled = false;
+				} else if (S.phase === "regen_pending" && !S.regenning) {
+					btnNext.textContent = "🔄 重試題組";
+					btnNext.disabled = false;
+				} else {
+					btnNext.textContent = "⏭ 下一題";
+					btnNext.disabled = true;
+				}
+			}
 
-function showFinished() {
-  S.phase = 'finished';
-  document.getElementById('progress-fill').style.width = '100%';
-  document.getElementById('progress-txt').textContent  = '全部完成 🎉';
-  document.getElementById('quiz-card').style.display     = 'none';
-  document.getElementById('finished-card').style.display = 'block';
-}
+			function showFinished() {
+				S.phase = "finished";
+				document.getElementById("progress-fill").style.width = "100%";
+				document.getElementById("progress-txt").textContent =
+					"全部完成 🎉";
+				document.getElementById("quiz-card").style.display = "none";
+				document.getElementById("finished-card").style.display =
+					"block";
+			}
 
-function selectOption(i) {
-  if (S.phase !== 'answering') return;
-  S.lastSel = i;
-  document.querySelectorAll('#qz-options .option').forEach((el, idx) => {
-    el.classList.toggle('selected', idx === i);
-  });
-}
+			function selectOption(i) {
+				if (S.phase !== "answering") return;
+				S.lastSel = i;
+				document
+					.querySelectorAll("#qz-options .option")
+					.forEach((el, idx) => {
+						el.classList.toggle("selected", idx === i);
+					});
+			}
 
-// ────────────────────────────────────────────
-// Submit
-// ────────────────────────────────────────────
-function doSubmit() {
-  if (S.phase !== 'answering') return;
-  if (S.lastSel === null) { alert('請先選擇答案'); return; }
+			// ────────────────────────────────────────────
+			// Submit
+			// ────────────────────────────────────────────
+			function doSubmit() {
+				if (S.phase !== "answering") return;
+				if (S.lastSel === null) {
+					alert("請先選擇答案");
+					return;
+				}
 
-  const g = S.questions.groups[S.groupI];
-  const q = g.questions[S.qI];
-  const isCorrect = S.lastSel === q.answer_index;
+				const g = S.questions.groups[S.groupI];
+				const q = g.questions[S.qI];
+				const isCorrect = S.lastSel === q.answer_index;
 
-  if (isCorrect) {
-    S._feedback   = '✅ 回答正確！';
-    S._feedbackOk = true;
-    S.correct++;
-    S.wrongStreak = 0;
-    S._showExpl   = false;
-  } else {
-    S._feedback   = '❌ 回答錯誤！正確答案：' + q.options[q.answer_index];
-    S._feedbackOk = false;
-    S.wrongStreak++;
-    S._showExpl   = true; // auto-show explanation for wrong answer
-  }
+				if (isCorrect) {
+					S._feedback = "✅ 回答正確！";
+					S._feedbackOk = true;
+					S.correct++;
+					S.wrongStreak = 0;
+					S._showExpl = false;
+				} else {
+					S._feedback =
+						"❌ 回答錯誤！正確答案：" + q.options[q.answer_index];
+					S._feedbackOk = false;
+					S.wrongStreak++;
+					S._showExpl = true; // auto-show explanation for wrong answer
+				}
 
-  appendLog({
-    timestamp: new Date().toISOString(),
-    account: S.account, name: S.name,
-    group: g.group_title, question: q.question,
-    selection: q.options[S.lastSel], correct: isCorrect, explained: false,
-  });
+				appendLog({
+					timestamp: new Date().toISOString(),
+					account: S.account,
+					name: S.name,
+					group: g.group_title,
+					question: q.question,
+					options: q.options,
+					answer_index: q.answer_index,
+					selected_index: S.lastSel,
+					selection: q.options[S.lastSel],
+					correct: isCorrect,
+					explained: false,
+				});
 
-  S.phase = 'submitted';
-  resolveGroupEnd(g);
-  renderQuizState();
-}
+				S.phase = "submitted";
+				resolveGroupEnd(g);
+				renderQuizState();
+			}
 
-function resolveGroupEnd(g) {
-  // wrongStreak >= 2 → regen
-  if (S.wrongStreak >= 2) {
-    S._summaryTitle = '⚠️ 連續答錯，進行題組重新生成';
-    S._summaryMsg   = buildSummary(g);
-    S.pendingAction = 'retry_group';
-    S.phase         = 'regen_pending';
-    triggerRegen(g, S.groupI);
-    return;
-  }
-  // end of group (3 questions done)
-  if (S.qI + 1 >= 3) {
-    S._summaryMsg = buildSummary(g);
-    if (S.correct >= 2) {
-      S._summaryTitle = '✅ 通過本題組！';
-      S.pendingAction = 'next_group';
-    } else {
-      S._summaryTitle = '❌ 未通過，進行題組重新生成';
-      S.pendingAction = 'retry_group';
-      S.phase         = 'regen_pending';
-      triggerRegen(g, S.groupI);
-    }
-    return;
-  }
-  // still questions remaining
-  S._summaryMsg   = '';
-  S._summaryTitle = '';
-  S.pendingAction = 'next_q';
-}
+			function resolveGroupEnd(g) {
+				// wrongStreak >= 2 → regen
+				if (S.wrongStreak >= 2) {
+					S._summaryTitle = "⚠️ 連續答錯，進行題組重新生成";
+					S._summaryMsg = buildSummary(g);
+					S.pendingAction = "retry_group";
+					S.phase = "regen_pending";
+					triggerRegen(g, S.groupI);
+					return;
+				}
+				// end of group (3 questions done)
+				if (S.qI + 1 >= 3) {
+					S._summaryMsg = buildSummary(g);
+					if (S.correct >= 2) {
+						S._summaryTitle = "✅ 通過本題組！";
+						S.pendingAction = "next_group";
+					} else {
+						S._summaryTitle = "❌ 未通過，進行題組重新生成";
+						S.pendingAction = "retry_group";
+						S.phase = "regen_pending";
+						triggerRegen(g, S.groupI);
+					}
+					return;
+				}
+				// still questions remaining
+				S._summaryMsg = "";
+				S._summaryTitle = "";
+				S.pendingAction = "next_q";
+			}
 
-// ────────────────────────────────────────────
-// Explain
-// ────────────────────────────────────────────
-function doExplain() {
-  if (S.phase === 'answering') return;
-  const g = S.questions.groups[S.groupI];
-  const q = g.questions[S.qI];
-  S._showExpl = true;
-  appendLog({
-    timestamp: new Date().toISOString(),
-    account: S.account, name: S.name,
-    group: g.group_title, question: q.question,
-    selection: '(view explanation)', correct: null, explained: true,
-  });
-  renderQuizState();
-}
+			// ────────────────────────────────────────────
+			// Explain
+			// ────────────────────────────────────────────
+			function doExplain() {
+				if (S.phase === "answering") return;
+				const g = S.questions.groups[S.groupI];
+				const q = g.questions[S.qI];
+				S._showExpl = true;
+				// 更新最近一筆同題目的記錄，標記已看解析，避免重複新增列
+				const logs = readLogs();
+				for (let i = logs.length - 1; i >= 0; i--) {
+					if (
+						logs[i].account === S.account &&
+						logs[i].question === q.question &&
+						!logs[i].explained
+					) {
+						logs[i].explained = true;
+						writeLogs(logs);
+						break;
+					}
+				}
+				renderQuizState();
+			}
 
-// ────────────────────────────────────────────
-// Regen
-// ────────────────────────────────────────────
-async function triggerRegen(g, idx) {
-  if (!S.sourceText) {
-    // no source → just retry original questions
-    S.phase = 'regen_ready';
-    renderQuizState();
-    return;
-  }
-  S.regenning = true;
-  renderQuizState();
-  try {
-    const prompt = fillTemplate(PROMPT_REGEN, {
-      group_title:   g.group_title,
-      difficulty:    g.difficulty  || '基礎',
-      group_summary: g.group_summary || '',
-      gid:           'g' + (idx + 1),
-      content:       S.sourceText,
-    });
-    const data  = await callOpenAI(prompt);
-    let newG    = data;
-    if (data.group && data.group.questions)    newG = data.group;
-    else if (data.groups && data.groups[0])    newG = data.groups[0];
-    if (!newG.questions) throw new Error('缺少 questions');
-    S.questions.groups[idx].questions = newG.questions;
-    if (newG.group_summary) S.questions.groups[idx].group_summary = newG.group_summary;
-  } catch (e) {
-    // silent fallback: retry original
-  } finally {
-    S.regenning = false;
-    S.qI        = S.correct = S.wrongStreak = 0;
-    S.phase     = 'regen_ready';
-    renderQuizState();
-  }
-}
+			// ────────────────────────────────────────────
+			// Regen
+			// ────────────────────────────────────────────
+			async function triggerRegen(g, idx) {
+				if (!S.sourceText) {
+					// no source → just retry original questions
+					S.phase = "regen_ready";
+					renderQuizState();
+					return;
+				}
+				S.regenning = true;
+				renderQuizState();
+				try {
+					const prompt = fillTemplate(PROMPT_REGEN, {
+						group_title: g.group_title,
+						difficulty: g.difficulty || "基礎",
+						group_summary: g.group_summary || "",
+						gid: "g" + (idx + 1),
+						content: S.sourceText,
+					});
+					const data = await callOpenAI(prompt);
+					let newG = data;
+					if (data.group && data.group.questions) newG = data.group;
+					else if (data.groups && data.groups[0])
+						newG = data.groups[0];
+					if (!newG.questions) throw new Error("缺少 questions");
+					S.questions.groups[idx].questions = newG.questions;
+					if (newG.group_summary)
+						S.questions.groups[idx].group_summary =
+							newG.group_summary;
+				} catch (e) {
+					// silent fallback: retry original
+				} finally {
+					S.regenning = false;
+					S.qI = S.correct = S.wrongStreak = 0;
+					S.phase = "regen_ready";
+					renderQuizState();
+				}
+			}
 
-// ────────────────────────────────────────────
-// Next
-// ────────────────────────────────────────────
-function doNext() {
-  const action = S.pendingAction;
-  if (action === 'next_q') {
-    S.qI++;
-  } else if (action === 'next_group') {
-    S.groupI++;
-    if (S.groupI >= S.questions.groups.length) { showFinished(); return; }
-    S.qI = S.correct = S.wrongStreak = 0;
-  } else if (action === 'retry_group') {
-    S.qI = S.correct = S.wrongStreak = 0;
-  }
-  S.phase         = 'answering';
-  S.pendingAction = '';
-  S.lastSel       = null;
-  S._feedback     = '';
-  S._feedbackOk   = true;
-  S._showExpl     = false;
-  S._summaryMsg   = '';
-  S._summaryTitle = '';
-  renderQuizState();
-}
+			// ────────────────────────────────────────────
+			// Next
+			// ────────────────────────────────────────────
+			function doNext() {
+				const action = S.pendingAction;
+				if (action === "next_q") {
+					S.qI++;
+				} else if (action === "next_group") {
+					S.groupI++;
+					if (S.groupI >= S.questions.groups.length) {
+						showFinished();
+						return;
+					}
+					S.qI = S.correct = S.wrongStreak = 0;
+				} else if (action === "retry_group") {
+					S.qI = S.correct = S.wrongStreak = 0;
+				}
+				S.phase = "answering";
+				S.pendingAction = "";
+				S.lastSel = null;
+				S._feedback = "";
+				S._feedbackOk = true;
+				S._showExpl = false;
+				S._summaryMsg = "";
+				S._summaryTitle = "";
+				renderQuizState();
+			}
 
-function doRestart() {
-  Object.assign(S, { questions:null, groupI:0, qI:0, correct:0, wrongStreak:0,
-                     phase:'answering', pendingAction:'', regenning:false, lastSel:null,
-                     sourceText:'', _feedback:'', _feedbackOk:true, _showExpl:false,
-                     _summaryMsg:'', _summaryTitle:'' });
-  selectedFile = null;
-  document.getElementById('file-chosen').textContent = '';
-  document.getElementById('btn-generate').disabled   = true;
-  document.getElementById('file-input').value        = '';
-  document.getElementById('upload-err').style.display = 'none';
-  document.getElementById('upload-section').style.display = 'block';
-  document.getElementById('quiz-section').style.display   = 'none';
-}
+			function doRestart() {
+				Object.assign(S, {
+					questions: null,
+					groupI: 0,
+					qI: 0,
+					correct: 0,
+					wrongStreak: 0,
+					phase: "answering",
+					pendingAction: "",
+					regenning: false,
+					lastSel: null,
+					sourceText: "",
+					_feedback: "",
+					_feedbackOk: true,
+					_showExpl: false,
+					_summaryMsg: "",
+					_summaryTitle: "",
+				});
+				selectedFile = null;
+				document.getElementById("file-chosen").textContent = "";
+				document.getElementById("btn-generate").disabled = true;
+				document.getElementById("file-input").value = "";
+				document.getElementById("upload-err").style.display = "none";
+				document.getElementById("upload-section").style.display =
+					"block";
+				document.getElementById("quiz-section").style.display = "none";
+			}
 
-// ────────────────────────────────────────────
-// Summary builder
-// ────────────────────────────────────────────
-function buildSummary(group) {
-  const base    = group.group_summary || '本題組無摘要';
-  const bullets = [];
-  for (const q of (group.questions || [])) {
-    const exp = (q.explanation || '').trim();
-    if (!exp) continue;
-    let cut = exp.length;
-    for (const sep of ['。','；',';','\n']) { const p = exp.indexOf(sep); if (p !== -1) cut = Math.min(cut, p+1); }
-    const pt = exp.slice(0, Math.max(20, Math.min(80, cut))).trim();
-    if (pt && !bullets.includes(pt)) bullets.push(pt);
-    if (bullets.length >= 6) break;
-  }
-  return base + (bullets.length ? '\n\n【延伸重點】\n' + bullets.map(b => '‧ ' + b).join('\n') : '');
-}
+			// ────────────────────────────────────────────
+			// Summary builder
+			// ────────────────────────────────────────────
+			function buildSummary(group) {
+				const base = group.group_summary || "本題組無摘要";
+				const bullets = [];
+				for (const q of group.questions || []) {
+					const exp = (q.explanation || "").trim();
+					if (!exp) continue;
+					let cut = exp.length;
+					for (const sep of ["。", "；", ";", "\n"]) {
+						const p = exp.indexOf(sep);
+						if (p !== -1) cut = Math.min(cut, p + 1);
+					}
+					const pt = exp
+						.slice(0, Math.max(20, Math.min(80, cut)))
+						.trim();
+					if (pt && !bullets.includes(pt)) bullets.push(pt);
+					if (bullets.length >= 6) break;
+				}
+				return (
+					base +
+					(bullets.length
+						? "\n\n【延伸重點】\n" +
+							bullets.map((b) => "‧ " + b).join("\n")
+						: "")
+				);
+			}
 
-// ────────────────────────────────────────────
-// TEACHER
-// ────────────────────────────────────────────
-function renderTeacher() {
-  allLogs      = readLogs();
-  filteredLogs = [...allLogs];
-  renderTable(filteredLogs);
-}
+			// ────────────────────────────────────────────
+			// TEACHER
+			// ────────────────────────────────────────────
+			function renderTeacher() {
+				allLogs = readLogs();
+				filteredLogs = [...allLogs];
+				renderTable(filteredLogs);
+			}
 
-function filterLogs() {
-  const q = document.getElementById('search-inp').value.toLowerCase();
-  filteredLogs = q
-    ? allLogs.filter(r =>
-        (r.account||'').toLowerCase().includes(q) ||
-        (r.name||'').toLowerCase().includes(q)    ||
-        (r.group||'').toLowerCase().includes(q))
-    : [...allLogs];
-  renderTable(filteredLogs);
-}
+			function filterLogs() {
+				const q = document
+					.getElementById("search-inp")
+					.value.toLowerCase();
+				filteredLogs = q
+					? allLogs.filter(
+							(r) =>
+								(r.account || "").toLowerCase().includes(q) ||
+								(r.name || "").toLowerCase().includes(q) ||
+								(r.group || "").toLowerCase().includes(q),
+						)
+					: [...allLogs];
+				renderTable(filteredLogs);
+			}
 
-function clearSearch() {
-  document.getElementById('search-inp').value = '';
-  filterLogs();
-}
+			function clearSearch() {
+				document.getElementById("search-inp").value = "";
+				filterLogs();
+			}
 
-function renderTable(logs) {
-  const tbody = document.getElementById('log-tbody');
-  tbody.innerHTML = '';
-  logs.forEach(r => {
-    const tr = document.createElement('tr');
-    const ts = (r.timestamp||'').slice(0,19).replace('T',' ');
-    const correctBadge = r.correct === null
-      ? '<span class="badge-nil">—</span>'
-      : r.correct
-        ? '<span class="badge-ok">✓</span>'
-        : '<span class="badge-no">✗</span>';
-    const explBadge = r.explained
-      ? '<span class="badge-ok">是</span>'
-      : '<span class="badge-nil">否</span>';
-    tr.innerHTML =
-      '<td><input type="checkbox" data-ts="' + escAttr(r.timestamp||'') + '"></td>' +
-      '<td>' + escHtml(ts) + '</td>' +
-      '<td>' + escHtml(r.account||'') + '</td>' +
-      '<td>' + escHtml(r.name||'') + '</td>' +
-      '<td>' + escHtml(r.group||'') + '</td>' +
-      '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + escAttr(r.question||'') + '">' + escHtml((r.question||'').slice(0,45)) + '</td>' +
-      '<td>' + escHtml((r.selection||'').slice(0,40)) + '</td>' +
-      '<td>' + correctBadge + '</td>' +
-      '<td>' + explBadge + '</td>';
-    tbody.appendChild(tr);
-  });
-  document.getElementById('log-count').textContent =
-    '共 ' + logs.length + ' 筆（總計 ' + allLogs.length + ' 筆）';
-  document.getElementById('check-all').checked = false;
-}
+			function renderTable(logs) {
+				const tbody = document.getElementById("log-tbody");
+				tbody.innerHTML = "";
+				logs.forEach((r) => {
+					const tr = document.createElement("tr");
+					const ts = (r.timestamp || "")
+						.slice(0, 19)
+						.replace("T", " ");
+					const correctBadge =
+						r.correct === null
+							? '<span class="badge-nil">—</span>'
+							: r.correct
+								? '<span class="badge-ok">✓</span>'
+								: '<span class="badge-no">✗</span>';
+					const explBadge = r.explained
+						? '<span class="badge-ok">是</span>'
+						: '<span class="badge-nil">否</span>';
+					// 四選項欄位：有完整選項資料時顯示全部，否則退回顯示作答文字
+					let optionsHtml = "";
+					if (
+						r.options &&
+						Array.isArray(r.options) &&
+						r.options.length
+					) {
+						const LABELS = ["A", "B", "C", "D"];
+						optionsHtml = r.options
+							.map((opt, i) => {
+								const isCorrect = i === r.answer_index;
+								const isSelected = i === r.selected_index;
+								let style =
+									"display:block;padding:2px 6px;border-radius:4px;margin:2px 0;font-size:12px;";
+								if (isCorrect)
+									style +=
+										"background:#d1fae5;color:#065f46;font-weight:700;";
+								else if (isSelected && !isCorrect)
+									style +=
+										"background:#fee2e2;color:#991b1b;font-weight:600;";
+								else style += "color:#9ca3af;";
+								return (
+									'<span style="' +
+									style +
+									'">' +
+									LABELS[i] +
+									". " +
+									escHtml(opt) +
+									"</span>"
+								);
+							})
+							.join("");
+					} else {
+						optionsHtml = escHtml((r.selection || "").slice(0, 40));
+					}
+					tr.innerHTML =
+						'<td><input type="checkbox" data-ts="' +
+						escAttr(r.timestamp || "") +
+						'"></td>' +
+						"<td>" +
+						escHtml(ts) +
+						"</td>" +
+						"<td>" +
+						escHtml(r.account || "") +
+						"</td>" +
+						"<td>" +
+						escHtml(r.name || "") +
+						"</td>" +
+						"<td>" +
+						escHtml(r.group || "") +
+						"</td>" +
+						'<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' +
+						escAttr(r.question || "") +
+						'">' +
+						escHtml((r.question || "").slice(0, 45)) +
+						"</td>" +
+						'<td style="min-width:160px;">' +
+						optionsHtml +
+						"</td>" +
+						"<td>" +
+						correctBadge +
+						"</td>" +
+						"<td>" +
+						explBadge +
+						"</td>";
+					tbody.appendChild(tr);
+				});
+				document.getElementById("log-count").textContent =
+					"共 " +
+					logs.length +
+					" 筆（總計 " +
+					allLogs.length +
+					" 筆）";
+				document.getElementById("check-all").checked = false;
+			}
 
-function toggleAll(cb) {
-  document.querySelectorAll('#log-tbody input[type=checkbox]').forEach(c => c.checked = cb.checked);
-}
+			function toggleAll(cb) {
+				document
+					.querySelectorAll("#log-tbody input[type=checkbox]")
+					.forEach((c) => (c.checked = cb.checked));
+			}
 
-function deleteSelected() {
-  const toDel = new Set();
-  document.querySelectorAll('#log-tbody input[type=checkbox]:checked').forEach(c => toDel.add(c.dataset.ts));
-  if (!toDel.size) { alert('請先勾選要刪除的記錄'); return; }
-  if (!confirm('確定刪除 ' + toDel.size + ' 筆記錄？')) return;
-  writeLogs(allLogs.filter(r => !toDel.has(r.timestamp||'')));
-  renderTeacher();
-}
+			function deleteSelected() {
+				const toDel = new Set();
+				document
+					.querySelectorAll("#log-tbody input[type=checkbox]:checked")
+					.forEach((c) => toDel.add(c.dataset.ts));
+				if (!toDel.size) {
+					alert("請先勾選要刪除的記錄");
+					return;
+				}
+				if (!confirm("確定刪除 " + toDel.size + " 筆記錄？")) return;
+				writeLogs(allLogs.filter((r) => !toDel.has(r.timestamp || "")));
+				renderTeacher();
+			}
 
-function exportCSV() {
-  const src = filteredLogs.length ? filteredLogs : allLogs;
-  const rows = [['時間','學號','姓名','題組','題目','作答','是否正確','是否看解析']];
-  src.forEach(r => rows.push([r.timestamp, r.account, r.name, r.group,
-                               r.question, r.selection, r.correct, r.explained]));
-  const csv  = rows.map(row => row.map(v => '"' + String(v ?? '').replace(/"/g,'""') + '"').join(',')).join('\r\n');
-  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
-  const a    = document.createElement('a');
-  a.href     = URL.createObjectURL(blob);
-  a.download = 'quiz_logs_' + new Date().toISOString().slice(0,10) + '.csv';
-  a.click();
-  URL.revokeObjectURL(a.href);
-}
+			function exportCSV() {
+				const src = filteredLogs.length ? filteredLogs : allLogs;
+				const rows = [
+					[
+						"時間",
+						"學號",
+						"姓名",
+						"題組",
+						"題目",
+						"作答",
+						"正確答案",
+						"是否正確",
+						"是否看解析",
+					],
+				];
+				src.forEach((r) => {
+					const LABELS = ["A", "B", "C", "D"];
+					const correctAns =
+						r.options && r.answer_index != null
+							? LABELS[r.answer_index] +
+								". " +
+								(r.options[r.answer_index] || "")
+							: "";
+					rows.push([
+						r.timestamp,
+						r.account,
+						r.name,
+						r.group,
+						r.question,
+						r.selection,
+						correctAns,
+						r.correct,
+						r.explained,
+					]);
+				});
+				const csv = rows
+					.map((row) =>
+						row
+							.map(
+								(v) =>
+									'"' +
+									String(v ?? "").replace(/"/g, '""') +
+									'"',
+							)
+							.join(","),
+					)
+					.join("\r\n");
+				const blob = new Blob(["\uFEFF" + csv], {
+					type: "text/csv;charset=utf-8",
+				});
+				const a = document.createElement("a");
+				a.href = URL.createObjectURL(blob);
+				a.download =
+					"quiz_logs_" +
+					new Date().toISOString().slice(0, 10) +
+					".csv";
+				a.click();
+				URL.revokeObjectURL(a.href);
+			}
 
-// ────────────────────────────────────────────
-// Utilities
-// ────────────────────────────────────────────
-function escHtml(s) {
-  return String(s)
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-}
-function escAttr(s) { return escHtml(s); }
-function showErr(el, msg) { el.textContent = msg; el.style.display = 'block'; }
+			// ────────────────────────────────────────────
+			// Utilities
+			// ────────────────────────────────────────────
+			function escHtml(s) {
+				return String(s)
+					.replace(/&/g, "&amp;")
+					.replace(/</g, "&lt;")
+					.replace(/>/g, "&gt;")
+					.replace(/"/g, "&quot;")
+					.replace(/'/g, "&#39;");
+			}
+			function escAttr(s) {
+				return escHtml(s);
+			}
+			function showErr(el, msg) {
+				el.textContent = msg;
+				el.style.display = "block";
+			}
 
-// Enter key on login
-document.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && S.page === 'login') doLogin();
-});
-</script>
-</body>
+			// Enter key on login
+			document.addEventListener("keydown", (e) => {
+				if (e.key === "Enter" && S.page === "login") doLogin();
+			});
+		</script>
+	</body>
 </html>
