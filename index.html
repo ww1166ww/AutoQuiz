@@ -602,23 +602,172 @@
 			}
 
 			/* ─── Responsive ─── */
-			@media (max-width: 600px) {
-				.login-card {
-					padding: 28px 20px;
+
+			/* ── Tablet (≤ 768px) ── */
+			@media (max-width: 768px) {
+				.content {
+					padding: 18px 14px;
+				}
+				.topbar {
+					padding: 8px 14px;
+					gap: 6px;
+				}
+				.upload-card {
+					padding: 28px 22px;
 				}
 				.quiz-card {
-					padding: 18px 14px;
+					padding: 22px 18px;
+				}
+				.group-title {
+					font-size: 18px;
 				}
 				.question-text {
 					font-size: 16px;
 				}
+				.teacher-toolbar {
+					flex-wrap: wrap;
+				}
+				.teacher-toolbar input {
+					min-width: unset;
+					flex: 1 1 100%;
+				}
+				.log-table-wrap {
+					font-size: 12px;
+				}
+				thead th,
+				tbody td {
+					padding: 8px 9px;
+				}
+			}
+
+			/* ── Mobile (≤ 600px) ── */
+			@media (max-width: 600px) {
+				.topbar {
+					flex-wrap: wrap;
+					padding: 8px 10px;
+					gap: 5px;
+				}
+				.topbar-user {
+					flex-basis: 100%;
+					order: -1;
+					font-size: 13px;
+				}
+				.topbar .btn {
+					flex: 1;
+					font-size: 12px;
+					padding: 7px 10px;
+				}
+				.content {
+					padding: 14px 10px;
+				}
+				.login-card {
+					padding: 28px 18px;
+				}
+				.login-title {
+					font-size: 21px;
+				}
+				.upload-card {
+					padding: 22px 14px;
+				}
+				.file-drop {
+					padding: 32px 14px;
+				}
+				.quiz-card {
+					padding: 16px 12px;
+				}
+				.group-title {
+					font-size: 16px;
+				}
+				.group-meta {
+					font-size: 12px;
+					flex-wrap: wrap;
+					gap: 5px;
+				}
+				.question-text {
+					font-size: 15px;
+					margin-bottom: 16px;
+				}
+				.options {
+					gap: 8px;
+				}
 				.option {
 					font-size: 14px;
 					padding: 11px 12px;
+					gap: 10px;
+				}
+				.opt-idx {
+					width: 26px;
+					height: 26px;
+					min-width: 26px;
+					font-size: 12px;
+				}
+				.btn-row {
+					flex-direction: column;
+					gap: 8px;
 				}
 				.btn-row .btn {
+					width: 100%;
+					font-size: 14px;
+					padding: 12px 14px;
+				}
+				.finished-card {
+					padding: 38px 18px;
+				}
+				.finished-card h2 {
+					font-size: 19px;
+				}
+				.teacher-toolbar {
+					flex-direction: column;
+					gap: 6px;
+				}
+				.teacher-toolbar input {
+					width: 100%;
+				}
+				.teacher-toolbar .btn {
+					width: 100%;
+				}
+				.table-footer {
+					flex-direction: column;
+					align-items: stretch;
+					gap: 8px;
+				}
+				.table-footer .btn {
+					width: 100%;
+				}
+				.summary-box {
 					font-size: 13px;
-					padding: 9px 10px;
+					padding: 12px 13px;
+				}
+				.explanation-box {
+					padding: 12px 13px;
+				}
+			}
+
+			/* ── Small mobile (≤ 400px) ── */
+			@media (max-width: 400px) {
+				.login-card {
+					padding: 22px 14px;
+				}
+				.login-title {
+					font-size: 19px;
+				}
+				.login-icon {
+					font-size: 40px;
+				}
+				.question-text {
+					font-size: 14px;
+				}
+				.option {
+					font-size: 13px;
+					padding: 10px 10px;
+				}
+				.group-title {
+					font-size: 15px;
+				}
+				thead th,
+				tbody td {
+					padding: 6px 7px;
+					font-size: 11px;
 				}
 			}
 		</style>
