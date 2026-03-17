@@ -1,3 +1,6 @@
+# 不追蹤此設定檔本身
+.gitignore
+
 # Secrets — 絕對不要上傳到 GitHub
 .streamlit/secrets.toml
 
